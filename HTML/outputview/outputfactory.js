@@ -81,7 +81,36 @@ widgets.text.prototype = $.extend(new ov.outputNode(), {
     this.$contents.text(this.properties.contents);
     this.$element.data('controller', this);
     
-    this.notify('view.callback', { raw: 'foo' });
+//    this.notify('view.callback', { raw: 'foo' });
+  },
+  
+});
+
+/**
+ * Widget: HTML output
+ */
+widgets.html = function (properties) {
+  
+  // Initialize node.
+  ov.outputNode.call(this, properties);
+  
+  this.$contents = this.$element.find('.contents');
+  this.updateElement();
+};
+
+widgets.html.prototype = $.extend(new ov.outputNode(), {
+  
+  // Return active markup for this widget.
+  $markup: function () {
+    var $outputNode = $('<div class="termkitOutputNode widgetHTML"><div class="contents"></div></div>').data('controller', this);
+    var that = this;
+    return $outputNode;
+  },
+
+  // Update markup to match.
+  updateElement: function () {
+    this.$contents.html(this.properties.contents);
+    this.$element.data('controller', this);
   },
   
 });
@@ -125,7 +154,8 @@ widgets.icon.prototype = $.extend(new ov.outputNode(), {
     // Set default icon.
     var image = new Image(),
         extension = (this.properties.stats.mode & 0x4000) ? '...' : this.properties.name.split('.').pop(),
-        defaultUrl = 'termkit-icon-default:///' + encodeURIComponent(extension);
+	  defaultUrl = '../Images/32/empty.png';
+
 
     image.onload = function () {
       callback && callback();
@@ -146,7 +176,72 @@ widgets.icon.prototype = $.extend(new ov.outputNode(), {
     // Set file-specific icon.
     var image = new Image(),
         path = this.properties.path + '/' + this.properties.name,
-        previewUrl = 'termkit-icon-preview:///' + encodeURIComponent(path);
+        extension = (this.properties.stats.mode & 0x4000) ? '...' : this.properties.name.split('.').pop(),
+	previewUrl = "../Images/";
+
+	if( extension == "..." ) {
+  	    previewUrl += "folder.png";
+	} else if( extension == "7z" ) {
+  	    previewUrl += "32/application-x-7z-compressed.png";
+	} else if( extension == "bmp" ) {
+  	    previewUrl += "32/image-bmp.png";
+	} else if( extension == "c" ) {
+  	    previewUrl += "32/text-x-csrc.png";
+        } else if( extension == "cpp" || extension == "cc" ) {
+	    previewUrl += "32/text-x-c++src.png";
+	} else if( extension == "css" ) {
+  	    previewUrl += "32/text-css.png";
+	} else if( extension == "doc" || extension == "docx" ) {
+  	    previewUrl += "32/application-msword.png";
+	} else if( extension == "h" ) {
+  	    previewUrl += "32/text-x-c++hdr.png";
+	} else if( extension == "html" || extension == "htm" ) {
+  	    previewUrl += "32/text-html.png";
+        } else if( extension == "exe" ) {
+	    previewUrl += "32/application-x-ms-dos-executable.png";
+        } else if( extension == "jar" ) {
+	    previewUrl += "32/application-x-jar.png";
+        } else if( extension == "java" ) {
+	    previewUrl += "32/text-x-java-source.png";
+        } else if( extension == "jpeg" || extension == "jpg" ) {
+	    previewUrl += "32/jpg.png";
+        } else if( extension == "js" ) {
+	    previewUrl += "32/text-x-javascript.png";
+        } else if( extension == "m3u" ) {
+	    previewUrl += "32/audio-x-mp3-playlist.png";
+        } else if( extension == "mpeg" || extension == "mpeg" ) {
+	    previewUrl += "32/audio-mpeg.png";
+	} else if( extension == "ogg" ) {
+  	    previewUrl += "32/application-ogg.png";
+        } else if( extension == "pdf" ) {
+	    previewUrl += "32/pdf.png";
+        } else if( extension == "php" ) {
+	    previewUrl += "32/application-x-php.png";
+        } else if( extension == "png" ) {
+	    previewUrl += "32/image-png.png";
+	} else if( extension == "py" ) {
+  	    previewUrl += "32/text-x-python.png";
+        } else if( extension == "rar" ) {
+	    previewUrl += "32/application-x-rar.png";
+	} else if( extension == "rtf" ) {
+  	    previewUrl += "32/application-rtf.png";
+        } else if( extension == "sh" ) {
+	    previewUrl += "32/shellscript.png";
+	} else if( extension == "gz" ) {
+  	    previewUrl += "32/application-x-tar.png";
+	} else if( extension == "torrent" ) {
+  	    previewUrl += "32/application-x-bittorrent.png";
+	} else if( extension == "txt" ) {
+ 	    previewUrl += "32/txt.png";
+	} else if( extension == "wma" ) {
+  	    previewUrl += "32/audio-x-ms-wma.png";
+        } else if( extension == "xml" ) {
+	    previewUrl += "32/application-xml.png";
+        } else if( extension == "zip" ) {
+	    previewUrl += "32/application-zip.png";
+        } else {
+	    previewUrl += "file.png";
+	}
 
     image.onload = function () {
       this.noDefault = true;
@@ -360,5 +455,67 @@ widgets.code.prototype = $.extend(new widgets.text(), {
   
 });
 
+/**
+ * Widget: Progress bar
+ */
+widgets.progress = function (properties) {
+  
+  // Initialize node.
+  ov.outputNode.call(this, properties);
+
+  this.bar = new termkit.progress();
+  this.$element.append(this.bar.$element);
+
+  this.updateElement();
+};
+
+widgets.progress.prototype = $.extend(new ov.outputNode(), {
+  
+  // Return active markup for this widget.
+  $markup: function () {
+    var $outputNode = $('<div class="termkitOutputNode widgetProgress"></div>').data('controller', this);
+    return $outputNode;
+  },
+  
+  // Update markup to match.
+  updateElement: function () {
+
+    this.bar.min = this.properties.min || 0;
+    this.bar.max = this.properties.max || 100;
+    this.bar.value = this.properties.value || 0;
+
+    this.bar.updateElement();
+  },
+  
+});
+
+/**
+ * Widget: Spinner
+ */
+widgets.spinner = function (properties) {
+  
+  // Initialize node.
+  ov.outputNode.call(this, properties);
+
+  this.spinner = new termkit.spinner();
+  this.$element.append(this.spinner.$element);
+
+  this.updateElement();
+};
+
+widgets.spinner.prototype = $.extend(new ov.outputNode(), {
+  
+  // Return active markup for this widget.
+  $markup: function () {
+    var $outputNode = $('<div class="termkitOutputNode widgetSpinner"></div>').data('controller', this);
+    return $outputNode;
+  },
+  
+  // Update markup to match.
+  updateElement: function () {
+    this.spinner.updateElement();
+  },
+  
+});
 
 })(jQuery);

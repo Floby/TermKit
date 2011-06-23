@@ -15,7 +15,7 @@ exports.shell = function (args, router) {
   
   // Extract location of source.
   var p, path = process.argv[1].split('/');
-  path[path.length - 1] = 'shell/worker.js';
+  path[path.length - 1] = './shell/worker.js';
   path = path.join('/');
   
   // Determine user identity.

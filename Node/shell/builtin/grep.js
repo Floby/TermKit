@@ -114,7 +114,10 @@ exports.main = function (tokens, pipes, exit) {
 
         // Filter values recursively.
         data = grep(data, pattern);
-        
+        // Guard against no line matches -- Thanks 'phaseq'
+        if( data == null ) {
+            data = new Array();
+        }
         if (json) {
           // Serialize
           data = JSON.stringify(data);
